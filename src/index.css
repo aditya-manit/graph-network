@@ -11,3 +11,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+#mynetwork {
+  width: 900px;
+  height: 900px;
+  border: 1px solid lightgray;
+}
