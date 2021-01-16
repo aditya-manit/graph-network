@@ -1,14 +1,20 @@
 import vis from "visjs-network"
+import axios from 'axios';
+
 // import Network from "react-graph-vis";
 // import Graph from "../../lib";
-
 // import Graph from 'react-graph-vis'
-
 // import React from "react";
-import axios from 'axios';
 // import React, {useState, useEffect} from 'react';
 // import { render } from "react-dom";
 
+
+/**
+ *     1) todo: different edge set for different subgraphs
+ *          the strange address before I and D
+ *     2) todo: if a same address is curator + indexer <-- handle this case
+ *     3) todo: when delegator/indexer>1000 or #ofindexer>1000 or #of curator>1000 or #of subgraphs>1000 --> write two query using first and skip
+ */
 const baseURL = "https://api.thegraph.com/subgraphs/name/graphprotocol/graph-network-mainnet";
 
 async function getIndexerStats() {
@@ -30,19 +36,55 @@ async function getIndexerStats() {
     return res.data;
 }
 
-async function dgetIndexerStats() {
+async function getSubgraphStats1() {
     const query = `
 {
-  delegators(
-    first: 1000 skip: 2000) {
-    id
+  subgraphDeployments(first:1000) {
+    originalName
+    indexerAllocations(first:1000){
+      indexer{
+        id
+      }
+    }
+    curatorSignals (first:1000) {
+      curator{
+        id
+      }
+    }
   }
 }
+
   `;
+
     const res = await axios.post(baseURL, {query});
     return res.data;
 }
 
+
+async function getSubgraphStats2() {
+
+    const query = `
+{
+  subgraphDeployments(first:1000) {
+    originalName
+    indexerAllocations(first:1000 skip: 1000){
+      indexer{
+        id
+      }
+    }
+    curatorSignals (first:1000 skip: 1000) {
+      curator{
+        id
+      }
+    }
+  }
+}
+
+
+  `;
+    const res = await axios.post(baseURL, {query});
+    return res.data;
+}
 
 async function loadIndexerData() {
     const indexerStats = await getIndexerStats();
@@ -50,22 +92,26 @@ async function loadIndexerData() {
 }
 
 
-async function dloadIndexerData() {
-    const indexerStats = await dgetIndexerStats();
-    console.log(indexerStats.data)
-    return indexerStats.data?.delegators;
+async function loadSubgraphData1() {
+    const subgraphStats = await getSubgraphStats1();
+    return subgraphStats.data.subgraphDeployments;
+}
+
+async function loadSubgraphData2() {
+    const subgraphStats = await getSubgraphStats2();
+    return subgraphStats.data.subgraphDeployments;
 }
 
 async function draw() {
     // create some nodes
     var gNodes = [];
     var gEdges = [];
-
-    gNodes.push({
-        id: "pooltogether",
-        label: "pooltogether",
-        group: "subgraph"
-    });
+    //
+    // gNodes.push({
+    //     id: "pooltogether",
+    //     label: "pooltogether",
+    //     group: "subgraph"
+    // });
     let totalNumberOfDelegators = 0;
     let totalNumberOfIndexers = 0;
     const indexerStats = await (loadIndexerData());
@@ -74,15 +120,15 @@ async function draw() {
         let countOfDelegatorsPerIndexer = 0;
         totalNumberOfIndexers++;
         gNodes.push({
-            id: "I-"+dataObj.id,
+            id: "I-" + dataObj.id,
             label: dataObj.id,
             group: "indexer"
         });
         set.add((dataObj.id));
-        gEdges.push({
-            from: "pooltogether", to: "I-"+dataObj.id
-        })
-      //  console.log(dataObj.id);
+        // gEdges.push({
+        //     from: "pooltogether", to: "I-"+dataObj.id
+        // })
+        //  console.log(dataObj.id);
 
         // console.log({
         //     id: dataObj.id,
@@ -92,14 +138,14 @@ async function draw() {
         for (const delegator of dataObj.delegators) {
             if (!set.has((delegator.delegator.id))) {
                 gNodes.push({
-                    id: "D-"+delegator.delegator.id,
+                    id: "D-" + delegator.delegator.id,
                     label: delegator.delegator.id,
                     group: "delegator"
                 });
                 set.add((delegator.delegator.id));
             }
             gEdges.push({
-                from: "I-"+dataObj.id, to: "D-"+delegator.delegator.id
+                from: "I-" + dataObj.id, to: "D-" + delegator.delegator.id
             })
             console.log(delegator.delegator.id);
             //0x4bbfbd1320093858d877ab0c8cd91ef0ce065318
@@ -107,20 +153,120 @@ async function draw() {
             countOfDelegatorsPerIndexer++;
         }
         totalNumberOfDelegators = totalNumberOfDelegators + countOfDelegatorsPerIndexer;
-      //  console.log((dataObj.id), countOfDelegatorsPerIndexer);
+        //  console.log((dataObj.id), countOfDelegatorsPerIndexer);
 
     }
     console.log(totalNumberOfIndexers, totalNumberOfDelegators)
     console.log(gNodes);
-    const dStats = await (dloadIndexerData());
+    const subgraphStats1 = await (loadSubgraphData1());
+    const subgraphStats2 = await (loadSubgraphData2());
 
+    /**
+     * subgraphStats has:
+     * 1) originalName
+     * 2) arr of curatorSignals
+     * 3) arr of indexerAllocations
+     */
 
-    let dcount = 0;
-    for (const dataObj of dStats) {
-        dcount++;
+        //   let edgeSet = new Set();
+
+    let map = new Map();
+    for (const subgraphStat of subgraphStats1) {
+        if (!map.has(subgraphStat.originalName)) {
+            map.set(subgraphStat.originalName, new Set())
+        }
+        let edgeSet = map.get(subgraphStat.originalName);
+        if (!set.has(subgraphStat.originalName)) {
+            gNodes.push({
+                id: "S-" + subgraphStat.originalName,
+                label: subgraphStat.originalName,
+                group: "subgraph"
+                // title: "odnsnnsnsnnsns"
+            });
+            set.add(subgraphStat.originalName)
+        }
+
+        for (const indexer of subgraphStat.indexerAllocations) {
+            if (!set.has(indexer.indexer.id)) {
+                gNodes.push({
+                    id: "I-" + indexer.indexer.id,
+                    label: indexer.indexer.id,
+                    group: "indexer"
+                });
+                set.add(indexer.indexer.id)
+            }
+            if (!edgeSet.has("I-" + indexer.indexer.id)) {
+                gEdges.push({
+                    from: "S-" + subgraphStat.originalName, to: "I-" + indexer.indexer.id,
+                })
+                edgeSet.add("I-" + indexer.indexer.id)
+            }
+        }
+//0x8b7663dd451c951f39e541188d9f7d9419e94421 not have any allocation
+        for (const curator of subgraphStat.curatorSignals) {
+            if (!set.has(curator.curator.id)) {
+                gNodes.push({
+                    id: "C-" + curator.curator.id,
+                    label: curator.curator.id,
+                    group: "curator"
+                });
+                set.add(curator.curator.id)
+            }
+
+            gEdges.push({
+                from: "S-" + subgraphStat.originalName, to: "C-" + curator.curator.id
+            })
+        }
     }
 
-    console.log(dcount);
+
+    for (const subgraphStat of subgraphStats2) {
+        if (!map.has(subgraphStat.originalName)) {
+            map.set(subgraphStat.originalName, new Set())
+        }
+        let edgeSet = map.get(subgraphStat.originalName);
+        if (!set.has(subgraphStat.originalName)) {
+            gNodes.push({
+                id: "S-" + subgraphStat.originalName,
+                label: subgraphStat.originalName,
+                group: "subgraph"
+            });
+            set.add(subgraphStat.originalName)
+        }
+
+        for (const indexer of subgraphStat.indexerAllocations) {
+            if (!set.has(indexer.indexer.id)) {
+                gNodes.push({
+                    id: "I-" + indexer.indexer.id,
+                    label: indexer.indexer.id,
+                    group: "indexer"
+                });
+                set.add(indexer.indexer.id)
+            }
+            if (!edgeSet.has("I-" + indexer.indexer.id)) {
+                gEdges.push({
+                    from: "S-" + subgraphStat.originalName, to: "I-" + indexer.indexer.id,
+                })
+                edgeSet.add("I-" + indexer.indexer.id)
+            }
+        }
+
+        for (const curator of subgraphStat.curatorSignals) {
+            if (!set.has(curator.curator.id)) {
+                gNodes.push({
+                    id: "C-" + curator.curator.id,
+                    label: curator.curator.id,
+                    group: "curator"
+                });
+                set.add(curator.curator.id)
+            }
+
+            gEdges.push({
+                from: "S-" + subgraphStat.originalName, to: "C-" + curator.curator.id
+            })
+        }
+    }
+
 
     var nodes = [
         {id: 0, label: "Myriel", group: 1},
@@ -469,7 +615,7 @@ async function draw() {
     var options = {
         nodes: {
             shape: "dot",
-            size: 16,
+            size: 16
         },
         physics: {
             forceAtlas2Based: {
