@@ -171,7 +171,7 @@ async function draw() {
                     color: "#DA70D6"
                 }
             })
-            console.log(delegator.delegator.id);
+            // console.log(delegator.delegator.id);
             //0x4bbfbd1320093858d877ab0c8cd91ef0ce065318
 
             countOfDelegatorsPerIndexer++;
@@ -180,8 +180,8 @@ async function draw() {
         //  console.log((dataObj.id), countOfDelegatorsPerIndexer);
 
     }
-    console.log(totalNumberOfIndexers, totalNumberOfDelegators)
-    console.log(gNodes);
+    // console.log(totalNumberOfIndexers, totalNumberOfDelegators)
+    // console.log(gNodes);
     const subgraphStats1 = await (loadSubgraphData1());
     const subgraphStats2 = await (loadSubgraphData2());
 
@@ -746,7 +746,7 @@ async function draw() {
     // network.stabilize(2000);
 
     document.getElementById("PreLoaderBar").style.display = "none";
-    console.log(network);
+    // console.log(network);
 
 
     go.count = 1;
@@ -756,15 +756,15 @@ async function draw() {
 
 }
 function go(network) {
-    console.log("in the function")
+    // console.log("in the function")
     if (go.count < 9) {
         // logs 1, 2, 3 to firebug console at 1 second intervals
-        console.log(go.count++);
+        // console.log(go.count++);
         window.setTimeout(go, 1000);
     }
     if(go.count === 9) {
         document.getElementById("PreLoaderBar").style.display = "none";
-        console.log(network);
+        // console.log(network);
         //console.log(network.getConnectedNodes())
     }
 
