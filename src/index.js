@@ -122,6 +122,15 @@ async function draw() {
         gNodes.push({
             id: "I-" + dataObj.id,
             label: dataObj.id,
+            shape: "database",
+            scaling: {
+                label: {
+                    enabled: true,
+                    min: 5,
+                    max: 5
+                }
+            },
+            value: 0.01,
             group: "indexer"
         });
         set.add((dataObj.id));
@@ -140,12 +149,27 @@ async function draw() {
                 gNodes.push({
                     id: "D-" + delegator.delegator.id,
                     label: delegator.delegator.id,
-                    group: "delegator"
+                    group: "delegator",
+                    shape: "circle",
+                    scaling: {
+                        label: {
+                            enabled: true,
+                            min: 2,
+                            max: 2
+                        }
+                    },
+                    value: 0.01
+                    // borderWidth: 2,
+                    // border: "black",
+                    // borderColor: "black"
                 });
                 set.add((delegator.delegator.id));
             }
             gEdges.push({
-                from: "I-" + dataObj.id, to: "D-" + delegator.delegator.id
+                from: "I-" + dataObj.id, to: "D-" + delegator.delegator.id,
+                color: {
+                    color: "#DA70D6"
+                }
             })
             console.log(delegator.delegator.id);
             //0x4bbfbd1320093858d877ab0c8cd91ef0ce065318
@@ -180,7 +204,16 @@ async function draw() {
             gNodes.push({
                 id: "S-" + subgraphStat.originalName,
                 label: subgraphStat.originalName,
-                group: "subgraph"
+                group: "subgraph",
+                shape: "ellipse",
+                scaling: {
+                    label: {
+                        enabled: true,
+                        min: 50,
+                        max: 50
+                    }
+                },
+                value: 0.01
                 // title: "odnsnnsnsnnsns"
             });
             set.add(subgraphStat.originalName)
@@ -191,13 +224,27 @@ async function draw() {
                 gNodes.push({
                     id: "I-" + indexer.indexer.id,
                     label: indexer.indexer.id,
-                    group: "indexer"
+                    group: "indexer",
+                    shape: "database",
+                    scaling: {
+                        label: {
+                            enabled: true,
+                            min: 5,
+                            max: 5
+                        }
+                    },
+                    value: 0.01
                 });
                 set.add(indexer.indexer.id)
             }
             if (!edgeSet.has("I-" + indexer.indexer.id)) {
                 gEdges.push({
                     from: "S-" + subgraphStat.originalName, to: "I-" + indexer.indexer.id,
+                    color: {
+                        color: "green"
+                    },
+                    width: 5
+
                 })
                 edgeSet.add("I-" + indexer.indexer.id)
             }
@@ -208,13 +255,27 @@ async function draw() {
                 gNodes.push({
                     id: "C-" + curator.curator.id,
                     label: curator.curator.id,
-                    group: "curator"
+                    group: "curator",
+                    shape: "circle",
+                    scaling: {
+                        label: {
+                            enabled: true,
+                            min: 5,
+                            max: 5
+                        }
+                    },
+                    value: 0.01
                 });
                 set.add(curator.curator.id)
             }
 
             gEdges.push({
-                from: "S-" + subgraphStat.originalName, to: "C-" + curator.curator.id
+                from:"C-" + curator.curator.id, to: "S-" + subgraphStat.originalName,
+                color: {
+                    color: "green"
+                },
+                width: 5
+
             })
         }
     }
@@ -229,7 +290,16 @@ async function draw() {
             gNodes.push({
                 id: "S-" + subgraphStat.originalName,
                 label: subgraphStat.originalName,
-                group: "subgraph"
+                group: "subgraph",
+                shape: "diamond",
+                scaling: {
+                    label: {
+                        enabled: true,
+                        min: 20,
+                        max: 20
+                    }
+                },
+                value: 0.01
             });
             set.add(subgraphStat.originalName)
         }
@@ -239,13 +309,26 @@ async function draw() {
                 gNodes.push({
                     id: "I-" + indexer.indexer.id,
                     label: indexer.indexer.id,
-                    group: "indexer"
+                    group: "indexer",
+                    shape: "database",
+                    scaling: {
+                        label: {
+                            enabled: true,
+                            min: 5,
+                            max: 5
+                        }
+                    },
+                    value: 0.01
                 });
                 set.add(indexer.indexer.id)
             }
             if (!edgeSet.has("I-" + indexer.indexer.id)) {
                 gEdges.push({
                     from: "S-" + subgraphStat.originalName, to: "I-" + indexer.indexer.id,
+                    color: {
+                        color: "green"
+                    },
+                    width: 5
                 })
                 edgeSet.add("I-" + indexer.indexer.id)
             }
@@ -256,13 +339,26 @@ async function draw() {
                 gNodes.push({
                     id: "C-" + curator.curator.id,
                     label: curator.curator.id,
-                    group: "curator"
+                    group: "curator",
+                    shape: "circle",
+                    scaling: {
+                        label: {
+                            enabled: true,
+                            min: 5,
+                            max: 5
+                        }
+                    },
+                    value: 0.01
                 });
                 set.add(curator.curator.id)
             }
 
             gEdges.push({
-                from: "S-" + subgraphStat.originalName, to: "C-" + curator.curator.id
+                from: "S-" + subgraphStat.originalName, to: "C-" + curator.curator.id,
+                color: {
+                    color: "green"
+                },
+                width: 5
             })
         }
     }
@@ -613,9 +709,16 @@ async function draw() {
         edges: gEdges,
     };
     var options = {
+        edges: {
+            color : {
+                inherit: false
+            }
+        },
+
+        layout: {improvedLayout: false},
         nodes: {
-            shape: "dot",
-            size: 16
+            shape: "dot"
+            // size: 16
         },
         physics: {
             forceAtlas2Based: {
@@ -627,15 +730,47 @@ async function draw() {
             maxVelocity: 146,
             solver: "forceAtlas2Based",
             timestep: 0.35,
-            stabilization: {iterations: 150},
-        },
+            stabilization: {
+                enabled: false,
+                iterations: 1000000},
+        }
+
+
+
     };
+    // eslint-disable-next-line no-unused-vars
     var network = new vis.Network(container, data, options);
+    // network.setOptions({
+    //     physics: {enabled:false}
+    // });
+    // network.stabilize(2000);
+
+    document.getElementById("PreLoaderBar").style.display = "none";
+    console.log(network);
+
+
+    go.count = 1;
+    go(network);
+
+
+
+}
+function go(network) {
+    console.log("in the function")
+    if (go.count < 9) {
+        // logs 1, 2, 3 to firebug console at 1 second intervals
+        console.log(go.count++);
+        window.setTimeout(go, 1000);
+    }
+    if(go.count === 9) {
+        document.getElementById("PreLoaderBar").style.display = "none";
+        console.log(network);
+        //console.log(network.getConnectedNodes())
+    }
+
 }
 
 window.addEventListener("load", () => {
-    draw();
+    draw()
 });
 
-
-// export default draw();

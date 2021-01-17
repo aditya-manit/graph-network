@@ -1,5 +1,7 @@
 <p><h1>Visualizing The Graph Network</h1></p>
-<head><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></head>
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
 <style>
     body {
         text-align: center;
@@ -11,7 +13,7 @@
 
     .subgraph {
         height: 25px;
-        width: 25px;
+        width: 50px;
         background-color: lightcoral;
         border-radius: 50%;
         display: inline-block;
@@ -36,7 +38,7 @@
     .delegator {
         height: 25px;
         width: 25px;
-        background-color: yellow;
+        background-color: #f8d568;
         border-radius: 50%;
         display: inline-block;
     }
@@ -58,6 +60,12 @@
         right: 10px;
     }
 
+    .elementLeft {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+    }
+
     .vl {
         border-left: 6px solid mediumslateblue;
         height: 25px;
@@ -65,28 +73,151 @@
 
     }
 
+
+    .progress {
+        position: relative;
+        height: 2px;
+        display: block;
+        width: 100%;
+        background-color: white;
+        border-radius: 2px;
+        background-clip: padding-box;
+        /*margin: 0.5rem 0 1rem 0;*/
+        overflow: hidden;
+
+    }
+
+    .progress .indeterminate {
+        background-color: black;
+    }
+
+    .progress .indeterminate:before {
+        content: '';
+        position: absolute;
+        background-color: #2C67B1;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        will-change: left, right;
+        -webkit-animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+        animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+    }
+
+    .progress .indeterminate:after {
+        content: '';
+        position: absolute;
+        background-color: #2C67B1;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        will-change: left, right;
+        -webkit-animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+        animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+        -webkit-animation-delay: 1.15s;
+        animation-delay: 1.15s;
+    }
+
+    @-webkit-keyframes indeterminate {
+        0% {
+            left: -35%;
+            right: 100%;
+        }
+        60% {
+            left: 100%;
+            right: -90%;
+        }
+        100% {
+            left: 100%;
+            right: -90%;
+        }
+    }
+
+    @keyframes indeterminate {
+        0% {
+            left: -35%;
+            right: 100%;
+        }
+        60% {
+            left: 100%;
+            right: -90%;
+        }
+        100% {
+            left: 100%;
+            right: -90%;
+        }
+    }
+
+    @-webkit-keyframes indeterminate-short {
+        0% {
+            left: -200%;
+            right: 100%;
+        }
+        60% {
+            left: 107%;
+            right: -8%;
+        }
+        100% {
+            left: 107%;
+            right: -8%;
+        }
+    }
+
+    @keyframes indeterminate-short {
+        0% {
+            left: -200%;
+            right: 100%;
+        }
+        60% {
+            left: 107%;
+            right: -8%;
+        }
+        100% {
+            left: 107%;
+            right: -8%;
+        }
+    }
+
 </style>
 
 <section class="element">
-    <div class="subgraph"></div>
-    <div class="text"><h2>Subgraph &nbsp;  </h2></div>
-<!--    <div class="vl"></div>-->
-    <i class="fa fa-database"style="font-size:30px;color:lightblue" ></i>
 
 
-<!--    <div class="indexer"></div>-->
-    <div class="text"><h2>  Indexer&nbsp;  </h2></div>
 
-<!--    <div class="vl"></div>-->
 
-    <div class="curator"></div>
-    <div class="text"><h2> Curator&nbsp;  </h2></div>
 
-<!--    <div class="vl"></div>-->
+    <i class="fa fa-database" style="font-size:30px;color:lightblue"></i>
+    <!--    <div class="indexer"></div>-->
+    <div class="text"><h2> Indexer &nbsp; </h2></div>
+
+    <!--    <div class="vl"></div>-->
+
+
+
+    <!--    <div class="vl"></div>-->
 
     <div class="delegator"></div>
-    <div class="text"><h2> Delegator&nbsp;  </h2></div>
+    <div class="text"><h2> Delegator&nbsp; </h2></div>
+
+
+    <div class="curator"></div>
+    <div class="text"><h2> Curator&nbsp; </h2></div>
+
+    <div class="subgraph"></div>
+    <!--    <i class="fa fa-diamond" style="font-size:30px;color:red"></i>-->
+
+    <div class="text"><h2>Subgraph </h2></div>
+    <!--    <div class="vl"></div>-->
+
 
 </section>
 
+<section class="elementLeft">
+    <div class="text"><p><h4>* Zoom In To View Addresses</h4></p>
+    </div>
+</section>
+<div class="progress" id="PreLoaderBar">
+    <div class="indeterminate"></div>
+</div>
+<hr style="height:2px;border-width:0;color:purple;background-color:purple">
 <div id="mynetwork"></div>
+
